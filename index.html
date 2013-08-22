@@ -71,10 +71,10 @@ function drawPostHit() {
     var d = $('<div/>')
 
     var t = $('<textarea style="width:600px;height:300px"/>').val(_.json({
+        sandbox : true,
         aws : {
             id : 'CHANGE_ME',
-            secret : 'CHANGE_ME',
-            sandbox : true,
+            secret : 'CHANGE_ME'
         },
         ExternalQuestion : {
             ExternalURL : 'CHANGE_ME',
