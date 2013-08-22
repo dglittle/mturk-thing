@@ -114,7 +114,9 @@ _.run(function () {
     rpc.postHit = function (arg, req) {
         arg.hit.Question = '<ExternalQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd"><ExternalURL>' + _.escapeXml(arg.ExternalQuestion.ExternalURL) + '</ExternalURL><FrameHeight>' + arg.ExternalQuestion.FrameHeight + '</FrameHeight></ExternalQuestion>'
 
-        var r = mturkRequest(arg.aws.id, arg.aws.secret, arg.sandbox, arg.hit)
+        var count = arg.count || 1
+        for (var i = 0; i < count; i++)
+            var r = mturkRequest(arg.aws.id, arg.aws.secret, arg.sandbox, arg.hit)
 
         return 'https://' + (arg.sandbox ? 'workersandbox.' : 'www.') + 'mturk.com/mturk/preview?groupId=' + r.match(/<HITTypeId>(.*?)</)[1]
     }

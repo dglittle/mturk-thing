@@ -70,7 +70,7 @@ function createThrobber() {
 function drawPostHit() {
     var d = $('<div/>')
 
-    var t = $('<textarea style="width:600px;height:300px"/>').val(_.json({
+    var t = $('<textarea style="width:600px;height:350px"/>').val(_.json({
         sandbox : true,
         aws : {
             id : 'CHANGE_ME',
@@ -90,7 +90,8 @@ function drawPostHit() {
             AssignmentDurationInSeconds : 60 * 60,
             LifetimeInSeconds : 60 * 60 * 24,
             AutoApprovalDelayInSeconds : 60 * 60,
-        }
+        },
+        count : 1
     }, true))
     d.append(t)
     d.append($('<br/>'))
