@@ -1,0 +1,112 @@
+<html>
+<head>
+<title>mturk thing</title>
+<style>
+</style>
+</head>
+<body>
+<script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+<script src="/gl519/jquery.cookie.js"></script>
+<script src="/gl519/index.js"></script>
+<script>
+
+function onError(msg) {
+    alert((msg || 'Oops. Not sure what happened.') + '\n\n' +
+        'Please try refreshing the page.')
+}
+
+g_rpc_version = $.cookie('rpc_version')
+g_rpc_token = $.cookie('rpc_token')
+g_rpc_timer = null
+g_rpc = []
+
+function rpc(func, arg, cb) {
+    if (typeof(arg) == 'function') return rpc(func, null, arg)
+    g_rpc.push({
+        payload : { func : func, arg : arg },
+        cb : cb
+    })
+    if (g_rpc_timer) clearTimeout(g_rpc_timer)
+    g_rpc_timer = setTimeout(function () {
+        g_rpc_timer = null
+        var save_rpc = g_rpc
+        g_rpc = []
+        $.ajax({
+            url : '/rpc/' + g_rpc_version + '/' + g_rpc_token,
+            type : 'post',
+            data : _.json(_.map(save_rpc, function (e) { return e.payload })),
+            success : function (r) {
+                _.each(r, function (r, i) {
+                    if (save_rpc[i].cb)
+                        save_rpc[i].cb(r)
+                })
+            },
+            error : function (s) {
+                onError(s.responseText)
+            }
+        })
+    }, 0)
+}
+
+function createThrobber() {
+    var d = $("<div />");
+    for (var i = 0; i < 10; i++) {
+        $("<span />").text(".")
+                     .appendTo(d)
+                     .css({ color: i === 0 ? "#000" : "#ccc" });
+    }
+    var timer = setInterval(function () {
+        if ($.contains(document.documentElement, d[0])) {
+            d.find("span:last").prependTo(d);
+        } else {
+            clearInterval(timer);
+        }
+    }, 300);
+    return d;
+}
+
+///
+
+function drawPostHit() {
+    var d = $('<div/>')
+
+    var t = $('<textarea style="width:600px;height:300px"/>').val(_.json({
+        aws : {
+            id : 'CHANGE_ME',
+            secret : 'CHANGE_ME',
+            sandbox : true,
+        },
+        ExternalQuestion : {
+            ExternalURL : 'CHANGE_ME',
+            FrameHeight : 800
+        },
+        hit : {
+            Operation : 'CreateHIT',
+            Title : 'CHANGE_ME',
+            Description : 'CHANGE_ME',
+            'Reward.1.Amount' : 0.01,
+            'Reward.1.CurrencyCode' : 'USD',
+            MaxAssignments : 1,
+            AssignmentDurationInSeconds : 60 * 60,
+            LifetimeInSeconds : 60 * 60 * 24,
+            AutoApprovalDelayInSeconds : 60 * 60,
+        }
+    }, true))
+    d.append(t)
+    d.append($('<br/>'))
+    d.append($('<button/>').text('submit').click(function () {
+        rpc('postHit', eval('(' + t.val() + ')'), function (url) {
+            d.append($('<a/>').attr('href', url).text(url))
+        })
+    }))
+
+    return d
+}
+
+$(function () {
+    $('body').append(drawPostHit())
+})
+
+</script>
+</body>
+</html>
